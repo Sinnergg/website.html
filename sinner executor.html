@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Page with Side Menu and Eyes</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Courier New', Courier, monospace;
+            color: #ffffff;
+            background-color: #000000;
+            background-image: url('https://cdn.discordapp.com/attachments/1318094227770576936/1322482772316655686/dithered-image.png');
+            background-size: auto;
+            background-position: center;
+            background-repeat: repeat;
+        }
+
+        .menu {
+            position: fixed;
+            top: 60px;
+            left: 0;
+            width: 250px;
+            height: calc(100% - 60px);
+            background-color: rgba(0, 0, 0, 0.8);
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.5);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            overflow: auto;
+            z-index: 1000;
+        }
+
+        .menu.open {
+            transform: translateX(0);
+        }
+
+        .menu-title {
+            color: red;
+            text-align: center;
+            margin: 10px 0;
+            text-shadow: 2px 2px 5px red;
+        }
+
+        .menu-button {
+            width: 100%;
+            padding: 15px;
+            background: none;
+            border: none;
+            color: #ffffff;
+            font-size: 18px;
+            text-align: left;
+            cursor: pointer;
+            border-bottom: 1px solid #444;
+        }
+
+        .menu-button:hover {
+            background-color: red;
+            color: black;
+        }
+
+        .menu-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: red;
+            border: none;
+            color: #ffffff;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            z-index: 1100;
+        }
+
+        .content {
+            margin: 20px;
+            text-align: center;
+            opacity: 1;
+            transition: opacity 0.5s ease;
+        }
+
+        .content.hidden {
+            opacity: 0;
+        }
+
+        .content-title {
+            font-size: 3em;
+            margin-top: 20px;
+            text-shadow: 2px 2px 5px red;
+        }
+
+        .content-text {
+            font-size: 1.2em;
+            line-height: 1.6;
+        }
+
+        .button-container {
+            margin-top: 20px;
+        }
+
+        .home-button {
+            background: red;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            margin: 10px;
+            border-radius: 5px;
+        }
+
+        .home-button:hover {
+            background: darkred;
+        }
+
+        .eyes-container {
+            position: fixed;
+            bottom: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10;
+        }
+
+        .eye {
+            position: relative;
+            width: 80px;
+            height: 80px;
+            background-color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.5);
+        }
+
+        .pupil {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: black;
+            border-radius: 50%;
+        }
+
+        footer {
+            margin-top: 50px;
+            font-size: 0.9em;
+            text-align: center;
+            color: #bbbbbb;
+        }
+    </style>
+</head>
+<body>
+    <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+    <nav class="menu" id="menu" aria-hidden="true">
+        <h2 class="menu-title">Menu</h2>
+        <button class="menu-button" onclick="showContent('home')">Home</button>
+        <button class="menu-button" onclick="showContent('free')">Free Install</button>
+        <button class="menu-button" onclick="showContent('paid')">Paid Sinner Executor</button>
+        <button class="menu-button" onclick="showContent('tips')">Install Instructions</button>
+        <button class="menu-button" onclick="showContent('contact')">Best Script hub</button>
+        <button class="menu-button" onclick="showContent('faq')">FAQ</button>
+        <button class="menu-button" onclick="showContent('support')">Discord</button>
+    </nav>
+
+    <main class="content" id="content" role="main">
+        <h1 class="content-title">Welcome!</h1>
+        <p class="content-text">Use the ☰ to navigate through the page content.</p>
+        <div class="button-container">
+            <button class="home-button" onclick="showContent('free')">Free Install</button>
+            <button class="home-button" onclick="showContent('paid')">Paid Sinner Executor</button>
+        </div>
+    </main>
+
+    <div class="eyes-container">
+        <div class="eye">
+            <div class="pupil" id="pupil1"></div>
+        </div>
+        <div class="eye">
+            <div class="pupil" id="pupil2"></div>
+        </div>
+    </div>
+
+    <footer>
+        ☠ UNC METER BELOW ☠
+        <meter value="86" min="0" max="100" low="30" high="70" optimum="80"></meter>
+    </footer>
+
+    <script>
+        const menu = document.getElementById('menu');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const content = document.getElementById('content');
+
+        // Add click event to toggle the menu visibility
+        menuToggle.addEventListener('click', () => {
+            const isOpen = menu.classList.toggle('open');
+            menu.setAttribute('aria-hidden', !isOpen);
+        });
+
+        // Function to dynamically update content with smooth transition
+        function showContent(section) {
+            // Get all child elements of the content that are not hidden
+            const elements = Array.from(content.children);
+            
+            // Function to hide elements one by one
+            function hideElements(elements, index) {
+                if (index < elements.length) {
+                    elements[index].style.transition = 'opacity 0.5s ease';
+                    elements[index].style.opacity = '0';
+                    setTimeout(() => hideElements(elements, index + 1), 100); // Delay of 100ms between elements
+                } else {
+                    // After all elements are hidden, update the content
+                    setTimeout(() => updateContent(section), 100);
+                }
+            }
+
+            // Start hiding elements one by one
+            hideElements(elements, 0);
+        }
+
+        // Function to update the content
+        function updateContent(section) {
+            let html = '';
+            switch (section) {
+                case 'home':
+                    html = `
+                        <h1 class="content-title">Welcome!</h1>
+                        <p class="content-text">Use the ☰ to navigate through the page content.</p>
+                        <div class="button-container">
+                            <button class="home-button" onclick="showContent('free')">Free Install</button>
+                            <button class="home-button" onclick="showContent('paid')">Paid Sinner Executor</button>
+                        </div>
+                    `;
+                    break;
+                case 'free':
+                    html = `
+                        <h1 class="content-title">Free Install</h1>
+                        <p class="content-text">Click below to download the free version of Sinner Executor:</p>
+                        <a class="download-link" href="https://example.com/free-download" download>Download Free Sinner Executor</a>
+                    `;
+                    break;
+                case 'paid':
+                    html = `
+                        <h1 class="content-title">Paid Sinner Executor</h1>
+                        <p class="content-text">Paid Sinner Executor is a better option for the guaranteed undetection and higher UNC Being 98% UNC. Join the discord to purchase</p>
+                        <p class="content-text">Pricing: Lifetime key $20 Paypal Only</p>
+                    `;
+                    break;
+                case 'tips':
+                    html = `
+                        <div class="container">
+                            <h1>Installation Instructions</h1>
+                            <p>Windows might detect the file as a false positive, so you'll need to disable it temporarily.</p>
+                            <p>Then run the <strong>Sinner.exe</strong>.</p>
+                            <p>Once launched, a menu will appear.</p>
+                            <p>Simply attach it to Roblox and run any script you want.</p>
+                        </div>
+                        <div class="container">
+                            <h1>Additional Instructions</h1>
+                            <p>Ensure your antivirus is turned off before downloading.</p>
+                            <p>Run the file as an administrator for optimal performance.</p>
+                            <p>Double-check that you are attaching the tool to Roblox correctly.</p>
+                        </div>
+                    `;
+                    break;
+                case 'contact':
+                    html = `
+                        <h1 class="content-title">Script hub Discord</h1>
+                        <p class="content-text">Sinner Script hub:<a href="https://guns.lol/hyporift">Discord</a></p>
+                    `;
+                    break;
+                case 'faq':
+                    html = `
+                        <h1 class="content-title">Frequently Asked Questions</h1>
+                        <ul class="content-text">
+                            <li>Q: How do I disable my antivirus?</li>
+                            <li>A: Follow the instructions provided by your antivirus software to temporarily disable it.</li>
+                            <li>Q: Is it safe to use Sinner Executor?</li>
+                            <li>A: Yes, it is safe to use. Ensure you follow the installation instructions carefully.</li>
+                            <li>Q: Can I use it on multiple devices?</li>
+                            <li>A: Yes, you can use it on multiple devices, but ensure you follow the installation process for each device.</li>
+                        </ul>
+                    `;
+                    break;
+                case 'support':
+                    html = `
+                        <h1 class="content-title">Discord</h1>
+                        <p class="content-text">Join our Discord: <a href="https://discord.gg/test">https://discord.gg/test</a></p>
+                    `;
+                    break;
+                default:
+                    html = '<h1 class="content-title">Welcome!</h1><p class="content-text">Use the menu to navigate through the page content.</p>';
+            }
+
+            // Update the content and fade it back in
+            content.innerHTML = html;
+            const newElements = Array.from(content.children);
+            newElements.forEach(el => {
+                el.style.opacity = '0'; // Set initial opacity to 0
+            });
+
+            // Fade in the new elements one by one
+            function showElements(elements, index) {
+                if (index < elements.length) {
+                    elements[index].style.transition = 'opacity 0.5s ease';
+                    elements[index].style.opacity = '1';
+                    setTimeout(() => showElements(elements, index + 1), 100); // Delay of 100ms between elements
+                }
+            }
+
+            showElements(newElements, 0);
+            menu.classList.remove('open'); // Close the menu after selection
+            menu.setAttribute('aria-hidden', 'true');
+        }
+
+        // Eyes that follow the mouse
+        const pupils = document.querySelectorAll('.pupil');
+        document.addEventListener('mousemove', (event) => {
+            const { clientX, clientY } = event;
+            pupils.forEach((pupil) => {
+                const rect = pupil.parentElement.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                const deltaX = clientX - centerX;
+                const deltaY = clientY - centerY;
+                const distance = Math.min(15, Math.sqrt(deltaX ** 2 + deltaY ** 2));
+                const angle = Math.atan2(deltaY, deltaX);
+
+                const pupilX = Math.cos(angle) * distance;
+                const pupilY = Math.sin(angle) * distance;
+
+                pupil.style.transform = `translate(${pupilX}px, ${pupilY}px)`;
+            });
+        });
+    </script>
+</body>
+</html>
